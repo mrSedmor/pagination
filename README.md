@@ -1,2 +1,3 @@
 # pagination
-An implementaion of pagination
+An implementaion of pagination.
+Can be adaptive.
