@@ -1,7 +1,14 @@
+// Якщо використовуєте бандлер використайте одну із закоментованих форм запису
 // import spriteHref from "./images/sprite.svg";
+// const spriteHref = require("./sprite.svg");
 const spriteHref = "./sprite.svg";
 
 class Pagination {
+  /*
+  selector - контейтер для пагінації; селектор або елемент.
+  buttonsCount - кількість кнопок зі сторінками, які будуть строврені в DOM
+  config - див метод tune; обов'язково передайде всі аргументи
+*/
   constructor({ selector, buttonsCount, ...config }) {
     this.refs = {
       container: selector instanceof Element ? selector : document.querySelector(selector),
@@ -11,7 +18,16 @@ class Pagination {
     this.createComponent(buttonsCount);
     this.tune(config);
   }
+  /*
+  Функція переналаштовує та перемальовує пагінацію
+  page - номер активної сторінки
+  totalPages - всього сторінок
+  pageSelectedCallback - колбек функція, що буде викликана при натисканні на кнопку із номером сторінки
+  maxButtons - кількість кнопок з номерами сторінок
+  hasDots - true, якщо використовувати кнопку "..."
 
+  Передайте тільки ті аргументи, що відрізняютсья від попереднього виклика метода.
+*/
   tune({ page, totalPages, pageSelectedCallback, maxButtons, hasDots }) {
     this.page = page ?? this.page;
     this.totalPages = totalPages ?? this.totalPages;
@@ -53,6 +69,7 @@ class Pagination {
     this.pageSelectedCallback(pageTarget);
   }
 
+  // Метод створює HTML розмітку пагінації та вставляє її в контейнер
   createComponent(maxButtons) {
     const buttonsMarkup = [];
     buttonsMarkup.push(`
@@ -75,7 +92,8 @@ class Pagination {
     this.refs.rightArrow = this.refs.container.querySelector(".pagin__button-right");
     this.refs.buttons = this.refs.container.querySelectorAll(".pagin__button-page");
   }
-
+  // Оновлює модель пагінації
+  // page - нова активна сторінка
   updateModel(page) {
     this.page = page;
     this.leftArrow = {
@@ -144,7 +162,7 @@ class Pagination {
       pushButton(this.totalPages, this.totalPages);
     }
   }
-
+  // Оновлює вид пагінації на сторінці
   render() {
     this.refs.leftArrow.classList.toggle("hidden", this.leftArrow.hidden);
     this.refs.leftArrow.dataset.target = this.leftArrow.target;
@@ -159,37 +177,47 @@ class Pagination {
     });
   }
 }
-const MOBILE_WIDTH = 480;
-const isMobileWidth = window.innerWidth <= MOBILE_WIDTH;
 
+// Приклад використання пагінації
+
+/*
+  Задача.
+  Нехай для мобільних пристроїв із шириною екрана не більше 480 px буде не більше 
+  5 кнопок з номерами сторінок і не буде використовуватись кнопка '...'.
+  Для пристроїв більшої ширини буде не більше 9 кнопок та буде використано '...'.
+*/
+const MOBILE_WIDTH = 480;
+let isMobileWidth = window.innerWidth <= MOBILE_WIDTH;
+const MOBILE_MAX_BUTTONS = 5;
+const DESKTOP_MAX_BUTTONS = 9;
+
+// Створюємо компонент.
 const pagination = new Pagination({
   selector: ".pagination",
-  buttonsCount: 9,
+  buttonsCount: DESKTOP_MAX_BUTTONS,
   page: 1,
   totalPages: 1000,
-  pageSelectedCallback: console.log,
-  maxButtons: isMobileWidth ? 5 : 9,
+  pageSelectedCallback: console.log.bind(null, "Обрано сторінку №"),
+  maxButtons: isMobileWidth ? MOBILE_MAX_BUTTONS : DESKTOP_MAX_BUTTONS,
   hasDots: !isMobileWidth,
 });
 
-window.addEventListener("resize", getWindowResizeHandler());
+// Відстежуємо змішу ширини екрану, щоб змінювати зовнішній вигляд пагінації
+window.addEventListener("resize", windowResizeHandler);
 
-function getWindowResizeHandler() {
-  let isMobileWidth = window.innerWidth <= MOBILE_WIDTH;
-  return function (event) {
-    const isNewMobileWidth = event.currentTarget.innerWidth <= MOBILE_WIDTH;
-    if (isMobileWidth && !isNewMobileWidth) {
-      pagination.tune({
-        maxButtons: 9,
-        hasDots: true,
-      });
-    }
-    if (!isMobileWidth && isNewMobileWidth) {
-      pagination.tune({
-        maxButtons: 5,
-        hasDots: false,
-      });
-    }
-    isMobileWidth = isNewMobileWidth;
-  };
+function windowResizeHandler(event) {
+  let isMobileNewWidth = window.innerWidth <= MOBILE_WIDTH;
+  if (isMobileWidth && !isMobileNewWidth) {
+    pagination.tune({
+      maxButtons: DESKTOP_MAX_BUTTONS,
+      hasDots: true,
+    });
+  }
+  if (!isMobileWidth && isMobileNewWidth) {
+    pagination.tune({
+      maxButtons: MOBILE_MAX_BUTTONS,
+      hasDots: false,
+    });
+  }
+  isMobileWidth = isMobileNewWidth;
 }
