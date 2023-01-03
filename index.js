@@ -193,7 +193,7 @@ const DESKTOP_MAX_BUTTONS = 9;
 
 // Створюємо компонент.
 const pagination = new Pagination({
-  selector: ".pagination",
+  selector: '[data-instance="1"]',
   buttonsCount: DESKTOP_MAX_BUTTONS,
   page: 1,
   totalPages: 1000,
@@ -221,3 +221,23 @@ function windowResizeHandler(event) {
   }
   isMobileWidth = isMobileNewWidth;
 }
+
+// Ще декілька
+new Pagination({
+  selector: '[data-instance="2"]',
+  buttonsCount: 3,
+  page: 1,
+  totalPages: 10,
+  pageSelectedCallback: console.log.bind(null, "Обрано сторінку №"),
+  maxButtons: 3,
+  hasDots: false,
+});
+new Pagination({
+  selector: '[data-instance="3"]',
+  buttonsCount: 7,
+  page: 1,
+  totalPages: 14,
+  pageSelectedCallback: console.log.bind(null, "Обрано сторінку №"),
+  maxButtons: 7,
+  hasDots: true,
+});
